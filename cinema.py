@@ -42,7 +42,7 @@ r5 = re.compile(ur"(\{\{[iI]nfobox Cinéma \(film\)(?:[^\}\{]|\{\{(?:[^\}\{]|\{\
 r6 = re.compile(ur"\{\{[iI]nfobox Cinéma \(film\)(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*titre *=")
 r7 = re.compile(ur"(\{\{[iI]nfobox Cinéma \(film\)[^\}]*titre *=(?:[^\|\n\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*)")
 r8 = re.compile(ur"(\{\{[iI]nfobox Cinéma \(film\))")
-r9 = re.compile(ur"(\{\{[tT]itre en italique\|[^\}]*\}\})")
+r9 = re.compile(ur"(\{\{[tT]itre en italique\|[^\}]*\}\} *\n)")
 
 i=0
 j=0
