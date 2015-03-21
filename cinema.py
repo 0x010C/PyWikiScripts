@@ -52,8 +52,7 @@ generator2 = pagegenerators.RegexFilter.contentfilter(generator1, r1, quantifier
 
 for page in generator2:
 	j=j+1
-	print str(j)+" : "+page.title()
-	print "########################################################\n\n"
+	print str(j)+" : "+page.title().encode("utf8")
 
 	l=r2.findall(page.text)[0]
 	# Si la langue est déjà dans l'infobox
@@ -70,3 +69,4 @@ for page in generator2:
 		page.text = r8.sub(r'\1\n| langue du titre = '+l+' ', page.text)
 	page.text = r9.sub(r'', page.text)
 	page.save(u"Maintenance infobox Cinéma (film)")
+	print "########################################################"
