@@ -47,6 +47,9 @@ r9 = re.compile(ur"(\{\{[tT]itre en italique\|[^\}]*\}\} *\n)")
 i=0
 j=0
 
+exceptions = []
+exceptions.append("Modèle:Infobox Cinéma (film)")
+
 generator1 = pagegenerators.ReferringPageGenerator(m1, onlyTemplateInclusion=True)
 generator2 = pagegenerators.RegexFilter.contentfilter(generator1, r1, quantifier='any')
 
@@ -55,6 +58,9 @@ for page in generator2:
 	print str(j)+" : "+page.title().encode("utf8")
 
 	l=r2.findall(page.text)[0]
+	# Si l'article fait parti des exceptions à ne pas traiter
+	if page.title() in exceptions:
+		continue
 	# Si la langue est déjà dans l'infobox
 	if r3.search(page.text):
 		print ""
