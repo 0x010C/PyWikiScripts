@@ -65,7 +65,7 @@ for page in generator2:
 	# Si le paramètre n'est pas présent, mais que le paramètre titre l'est
 	elif r6.search(page.text):
 		page.text = r7.sub(r'\1\n| langue du titre = '+l+' ', page.text)
-	# Si le paramètre n'est pas présen, et titre non plus
+	# Si le paramètre n'est pas présent, et titre non plus
 	else:
 		page.text = r8.sub(r'\1\n| langue du titre = '+l+' ', page.text)
 	page.text = r9.sub(r'', page.text)
