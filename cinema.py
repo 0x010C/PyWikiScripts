@@ -31,6 +31,10 @@ site = pywikibot.getSite()
 if not site.logged_in():
 	site.login()
 
+pdd = pywikibot.Page(site, u"Discussion utilisateur:RobokoBot")
+pddD = pywikibot.Page(site, u"Discussion utilisateur:Thibaut120094")
+rpdd = re.compile(ur"^\{\{\/Stop\}\}$")
+
 m1 = pywikibot.Page(site, u"Modèle:Infobox Cinéma (film)")
 m2 = pywikibot.Page(site, u"Modèle:Titre en italique")
 
@@ -76,3 +80,15 @@ for page in generator2:
 	page.text = r9.sub(r'', page.text)
 	page.save(u"Maintenance infobox Cinéma (film)")
 	print "########################################################"
+	coupe_circuit_pdd()
+
+
+def coupe_circuit_pdd():
+	pdd.get()
+	if not rpdd.search(pdd.text):
+		print u"Arrêt forcé demandé.\n********************\n"
+		print pdd.text
+		pddD.get()
+		pddD.text = pddD.text+u"\n== Un utilisateur a demandé l'arrêt de RobokoBot ==\n*[[Discussion utilisateur:RobokoBot]]\n*[[/Spécial:Contributions/RobokoBot]]"
+		pddD.save(u"Arrêt de RobokoBot")
+		sys.exit()
