@@ -66,9 +66,10 @@ exceptions = []
 exceptions.append(u"Modèle:Infobox Cinéma (film)")
 
 generator1 = pagegenerators.ReferringPageGenerator(m1, onlyTemplateInclusion=True)
-generator2 = pagegenerators.RegexFilter.contentfilter(generator1, r1, quantifier='any')
+generator2 = pagegenerators.NamespaceFilterPageGenerator(generator1, [0])
+generator3 = pagegenerators.RegexFilter.contentfilter(generator1, r1, quantifier='any')
 
-for page in generator2:
+for page in generator3:
 	j=j+1
 	print str(j)+" : "+page.title().encode("utf8")
 
