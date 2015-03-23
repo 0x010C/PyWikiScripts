@@ -48,7 +48,7 @@ i=0
 j=0
 
 exceptions = []
-exceptions.append("Modèle:Infobox Cinéma (film)")
+exceptions.append(u"Modèle:Infobox Cinéma (film)")
 
 generator1 = pagegenerators.ReferringPageGenerator(m1, onlyTemplateInclusion=True)
 generator2 = pagegenerators.RegexFilter.contentfilter(generator1, r1, quantifier='any')
