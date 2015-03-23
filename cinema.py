@@ -38,7 +38,7 @@ rpdd = re.compile(ur"^\{\{\/Stop\}\}$")
 def coupe_circuit_pdd():
 	pdd.get()
 	if not rpdd.search(pdd.text):
-		print u"Arrêt forcé demandé.\n********************\n"
+		print u"Arret du bot.\n********************\n"
 		print pdd.text
 		pddD.get()
 		pddD.text = pddD.text+u"\n== Un utilisateur a demandé l'arrêt de RobokoBot ==\n*[[Discussion utilisateur:RobokoBot]]\n*[[/Spécial:Contributions/RobokoBot]]"
