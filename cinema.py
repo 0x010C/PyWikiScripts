@@ -25,6 +25,7 @@ import pywikibot
 from pywikibot import pagegenerators
 from pywikibot.data import api
 import re
+import sys
 
 
 site = pywikibot.getSite()
@@ -32,16 +33,16 @@ if not site.logged_in():
 	site.login()
 
 
-pdd = pywikibot.Page(site, u"Discussion utilisateur:RobokoBot")
-pddD = pywikibot.Page(site, u"Discussion utilisateur:Thibaut120094")
+pdd = pywikibot.Page(site, u"User talk:RobokoBot")
+pddD = pywikibot.Page(site, u"User talk:Thibaut120094")
 rpdd = re.compile(ur"^\{\{\/Stop\}\}$")
 def coupe_circuit_pdd():
 	pdd.get()
 	if not rpdd.search(pdd.text):
-		print u"Arret du bot.\n********************\n"
+		print u"Arrêt du bot.\n********************\n"
 		print pdd.text
 		pddD.get()
-		pddD.text = pddD.text+u"\n== Un utilisateur a demandé l'arrêt de RobokoBot ==\n*[[Discussion utilisateur:RobokoBot]]\n*[[/Spécial:Contributions/RobokoBot]]"
+		pddD.text = pddD.text+u"\n== Un utilisateur a demandé l'arrêt de RobokoBot ==\n*[[Discussion utilisateur:RobokoBot]]\n*[[Spécial:Contributions/RobokoBot]]"
 		pddD.save(u"Arrêt de RobokoBot")
 		sys.exit()
 
@@ -93,3 +94,4 @@ for page in generator3:
 	page.save(u"Maintenance infobox Cinéma (film)")
 	print "########################################################"
 	coupe_circuit_pdd()
+
