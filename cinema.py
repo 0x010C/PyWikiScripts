@@ -20,6 +20,11 @@
 #	with this program; if not, write to the Free Software Foundation, Inc.,
 #	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+This Script uses PyWikiBot to run
+see https://www.mediawiki.org/wiki/Manual:Pywikibot for more details on how to set it up
+"""
+
 
 import pywikibot
 from pywikibot import pagegenerators
