@@ -130,9 +130,9 @@ Search for users and passwords in the config file
 """
 def parse_config_file():
 	global user_otrs, user_wiki, password_otrs, password_wiki
-	if(os.path.isfile("otrs_backlog.conf") == False):
+	if(os.path.isfile(os.path.dirname(os.path.realpath(__file__))+"/otrs_backlog.conf") == False):
 		return;
-	fichier = open("otrs_backlog.conf", "r");
+	fichier = open(os.path.dirname(os.path.realpath(__file__))+"/otrs_backlog.conf", "r");
 	contenu = fichier.read();
 	fichier.close();
 	for line in contenu.split("\n"):
@@ -188,7 +188,6 @@ def main():
 
 		update_wiki(queues[i]['page'], age)
 		print queues[i]['page'] + " : " + age + " jours"
-
 
 
 main()
