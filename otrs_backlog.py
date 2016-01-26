@@ -16,6 +16,7 @@ queues  = [
 	{"page":u"Wikipédia:OTRS/backlog-info-fr", "id":u"19"},
 	{"page":u"Wikipédia:OTRS/backlog-permissions-commons-fr", "id":u"127"},
 	{"page":u"Wikipédia:OTRS/backlog-permissions-fr", "id":u"35"},
+	{"page":u"Wikipédia:OTRS/backlog-photosubmissions-fr", "id":u"121"},
 ]
 url_otrs = u"https://ticket.wikimedia.org/otrs/index.pl"
 url_wiki = u"https://fr.wikipedia.org/w/api.php"
