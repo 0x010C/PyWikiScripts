@@ -16,7 +16,7 @@ queues  = [
 	{"page":u"Wikipédia:OTRS/backlog-info-fr", "id":u"19"},
 	{"page":u"Wikipédia:OTRS/backlog-permissions-commons-fr", "id":u"127"},
 	{"page":u"Wikipédia:OTRS/backlog-permissions-fr", "id":u"35"},
-	{"page":u"Wikipédia:OTRS/backlog-photosubmissions-fr", "id":u"121"},
+	{"page":u"Wikipédia:OTRS/backlog-photosubmissions-fr", "id":u"129"},
 ]
 url_otrs = u"https://ticket.wikimedia.org/otrs/index.pl"
 url_wiki = u"https://fr.wikipedia.org/w/api.php"
@@ -24,8 +24,8 @@ user_otrs = u""
 user_wiki = u""
 password_otrs = u""
 password_wiki = u""
-regex_token = re.compile(u"ChallengeToken: '([0-9abcdef]+)',")
-regex_age = re.compile(u"<td>[^0-9]*([0-9]* [jhm])(?: [0-9]* [hm])*[^0-9]*</td>")
+regex_token = re.compile(u"name=\"ChallengeToken\" value=\"([0-9a-zA-Z]+)\"")
+regex_age = re.compile(u"<div title=\"([0-9]+ [jhm](?: [0-9]+ [hm])*) *\">")
 session_otrs = requests.Session()
 session_wiki = requests.Session()
 
@@ -59,7 +59,7 @@ def get_ages(token, queue_id):
 		"ShownAttributes":"%3BLabelFulltext%3BLabelStateIDs%3BLabelQueueIDs",
 		"StateIDs":"1",
 		"QueueIDs":queue_id,
-		"AttributeOrig":"TicketNumber",
+		"Attribute":"TicketNumber",
 		"ResultForm":"Normal",
 		"SortBy":"Age",
 		"OrderBy":"Up",
@@ -192,3 +192,4 @@ def main():
 
 
 main()
+
