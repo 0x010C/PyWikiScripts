@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #Autor: Antoine "0x010C" Lamielle
-#Date: 28 October 2015
+#Date: 20 February 2016
 #License: GNU GPL v3
 
 import sys
