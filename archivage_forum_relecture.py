@@ -12,8 +12,6 @@ import requests
 import urllib
 import pywiki
 
-user = ""
-password = ""
 DAYS = 10
 
 def json_findall(v, k):
@@ -24,6 +22,7 @@ def json_findall(v, k):
 				r += [int(v[k1])]
 			r += json_findall(v[k1], k)
 	return r
+
 
 def get_last_edition_time_flow_thread(self, thread):
 	r = self.session.post(self.api_endpoint, data={
@@ -79,20 +78,20 @@ pywiki.Pywiki.close_flow_topic = close_flow_topic
 
 # Main
 def main():
-	pw = pywiki.Pywiki("https://fr.wikipedia.org/w/api.php", user, password, "user")
+	pw = pywiki.Pywiki("frwiki-NeoBOT")
 	pw.login()
 	
 	threads_in_cat = pw.get_all_pages_in_cat("Catégorie:Requête en attente d'une réponse", "2600")
+	threads_in_cat += pw.get_all_pages_in_cat("Catégorie:Attenteinfo", "2600")
+	threads_in_cat += pw.get_all_pages_in_cat("Catégorie:Autreavis", "2600")
+	threads_in_cat += pw.get_all_pages_in_cat("Catégorie:Encours", "2600")
 	date_threshold = int((date.today() - timedelta(days=DAYS)).strftime("%Y%m%d%H%M%S"))
-	i = 0
 	for thread in threads_in_cat:
 		if pw.get_last_edition_time_flow_thread("Sujet:"+thread) < date_threshold:
+			print "Archivage de Sujet:"+thread
 			pw.update_flow_topic_summary("Sujet:"+thread)
 			pw.close_flow_topic("Sujet:"+thread)
-		i += 1
-		print i
 
 
 main()
-
 
