@@ -5,22 +5,65 @@
 #License: GNU GPL v3
 
 import sys
+import os
 import time
 import json
 import requests
 
-version = "v1.00"
+version = "v1.42"
 
 
 class Pywiki:
 
-	def __init__(self, api_endpoint, user, password, mw_assert="bot"):
-		self.api_endpoint = api_endpoint
-		self.user = user
-		self.password = password
-		self.mw_assert = mw_assert
+	def __init__(self, config_name):
+		user_path = os.path.dirname(os.path.realpath(__file__)) + "/users/"
+		if not os.path.exists(user_path):
+			os.makedirs(user_path)
+		if(os.path.isfile(user_path+config_name+".py") == False):
+			print "The user configuration file called '"+config_name+"' seems missing. Don't worry, we will create it yet :\n"
+			print "user:"
+			print "> ",;user = sys.stdin.readline().split("\n")[0]
+			print "password:"
+			print "> ",;password = sys.stdin.readline().split("\n")[0]
+			print "assertion ('user' or 'bot'):"
+			print "> ",;assertion = sys.stdin.readline().split("\n")[0]
+			print "api endpoint (ex. 'https://en.wikipedia.org/w/api.php'):"
+			print "> ",;api_endpoint = sys.stdin.readline().split("\n")[0]
+			file = open("users/"+config_name+".py", "w")
+			file.write("# -*- coding: utf-8  -*-\nuser = u'"+user+"'\npassword = u'"+password+"'\nassertion = u'"+assertion+"'\napi_endpoint = u'"+api_endpoint+"'")
+			file.close()
+		sys.path.append(user_path)
+		config = __import__(config_name, globals(), locals(), [], -1)
+		
+		self.user = config.user
+		self.password = config.password
+		self.api_endpoint = config.api_endpoint
+		self.assertion = config.assertion
+		if self.assertion == "bot":
+			self.limit = 5000
+		else:
+			self.limit = 500
+		
 		self.session = requests.Session()
-	
+
+	"""
+	Perform a given request with a simple but usefull error managment
+	"""
+	def request(self, data):		
+		relogin = 2
+		while relogin:
+			r = self.session.post(self.api_endpoint, data=data)
+			response = json.loads(r.text)
+			if response.has_key("error"):
+				if response['error']['code'] == 'assertuserfailed':
+					self.login()
+					relogin -= 1
+					continue
+				break
+			return response
+		raise Exception('API error', response['error'])
+
+
 	"""
 	Login into the wiki
 	"""
@@ -48,14 +91,14 @@ class Pywiki:
 	Get a crsf token from frwiki to be able to edit a page
 	"""
 	def get_csrf_token(self):
-		r = self.session.post(self.api_endpoint, data={
+		r = self.request({
 			"action":"query",
 			"meta":"tokens",
 			"type":"csrf",
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		})
-		return json.loads(r.text)["query"]["tokens"]["csrftoken"]
+		return r["query"]["tokens"]["csrftoken"]
 
 
 	"""
@@ -70,10 +113,9 @@ class Pywiki:
 			"summary":summary,
 			"nocreate":"",
 			"token":token,
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		})
-		print r.text
 
 
 	"""
@@ -91,7 +133,7 @@ class Pywiki:
 			"generator":"categorymembers",
 			"gcmtitle":category,
 			"gcmnamespace":ns,
-			"gcmlimit":"500",
+			"gcmlimit":self.limit,
 			"gcmcontinue":gcm_continue,
 		})
 		response = json.loads(r.text)
@@ -100,8 +142,9 @@ class Pywiki:
 		else:
 			gcm_continue = None
 		titles = []
-		for i in response["query"]["pages"]:
-			titles += response["query"]["pages"][i]["title"].split(":")[1:]
+		if "query" in response:
+			for i in response["query"]["pages"]:
+				titles += response["query"]["pages"][i]["title"].split(":")[1:]
 		return (titles,gcm_continue)
 
 
@@ -135,7 +178,7 @@ class Pywiki:
 			"titles":title,
 			"tiprop":"title",
 			"tinamespace":ns,
-			"tilimit":"500",
+			"tilimit":self.limit,
 			"ticontinue":ti_continue,
 		})
 		response = json.loads(r.text)
@@ -143,10 +186,12 @@ class Pywiki:
 			ti_continue = response["continue"]["ticontinue"]
 		else:
 			ti_continue = None
-		raw_titles = response["query"]["pages"].itervalues().next()["transcludedin"]
+			
 		titles = []
-		for title in raw_titles:
-			titles += [title["title"]]
+		if "query" in response:
+			raw_titles = response["query"]["pages"].itervalues().next()["transcludedin"]
+			for title in raw_titles:
+				titles += [title["title"]]
 		return (titles,ti_continue)
 
 
@@ -158,6 +203,46 @@ class Pywiki:
 		all_titles = []
 		while ti_continue != None:
 			(titles, ti_continue) = self.get_transcluded_pages(title, ns, ti_continue)
+			all_titles += titles
+		return all_titles
+
+
+	"""
+	Get the N first redirect pages of the wiki
+	"""
+	def get_redirects(self, ns=None, gar_continue=""):
+		data = {
+			"action":"query",
+			"format":"json",
+			"generator":"allredirects",
+			"garlimit":self.limit,
+			"assert":self.assertion,
+		}
+		if ns != None:
+			data["garnamespace"] = ns
+		if gar_continue != "":
+			data["garcontinue"] = gar_continue
+		response = self.request(data)
+		
+		if "continue" in response:
+			gar_continue = response["continue"]["garcontinue"]
+		else:
+			gar_continue = None
+		page_list = response["query"]["pages"]
+		titles = []
+		for id in page_list:
+			if page_list[id].has_key("title"):
+				titles += [page_list[id]["title"]]
+		return (titles,gar_continue)
+
+	"""
+	Get all redirect pages of the wiki
+	"""
+	def get_all_redirects(self, ns=None):
+		gar_continue = ""
+		all_titles = []
+		while gar_continue != None:
+			(titles, gar_continue) = self.get_redirects(ns, gar_continue)
 			all_titles += titles
 		return all_titles
 
@@ -175,7 +260,7 @@ class Pywiki:
 			titles = [titles]
 		data={
 			"action":"edit",
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		}
 		if nocreate:
@@ -203,7 +288,7 @@ class Pywiki:
 			titles = [titles]
 		data={
 			"action":"edit",
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		}
 		if nocreate:
@@ -231,7 +316,7 @@ class Pywiki:
 			titles = [titles]
 		data={
 			"action":"edit",
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		}
 		if nocreate:
@@ -249,17 +334,37 @@ class Pywiki:
 	"""
 	Get the number of notification of the currently-logged user
 	"""
-	def getNotificationsCount(self):
+	def get_notifications_count(self):
 		r = self.session.post(self.api_endpoint, data={
 			"action":"query",
 			"meta":"notifications",
 			"notsections":"alert",
 			"notprop":"count",
-			"assert":self.mw_assert,
+			"assert":self.assertion,
 			"format":"json"
 		})
 		response = json.loads(r.text)
 		return response["query"]["notifications"]["count"]
+
+
+	def exist(self, titles, invert=False):
+		r = self.session.post(self.api_endpoint, data={
+			"action":"query",
+			"format":"json",
+			"titles":"|".join(titles),
+			"prop":"info",
+			"assert":self.assertion,
+		})
+	
+		response = json.loads(r.text)
+		page_list = response["query"]["pages"]
+		result = []
+		for id in page_list:
+			if int(id) > 0 and not invert:
+				result += [page_list[id]["title"]]
+			elif int(id) < 0 and invert:
+				result += [page_list[id]["title"]]
+		return result
 
 
 	"""
