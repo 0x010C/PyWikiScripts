@@ -12,11 +12,11 @@ import pywiki
 
 
 #Paramètres
-version = "1.00"
+version = "1.02"
 src_lang = "en"
 dst_lang = "fr"
 searched_template = "Template:ja-noun"
-
+editintro_template = "Utilisateur:Thibaut120094/template_ja"
 
 
 # Main
@@ -39,7 +39,7 @@ def main():
 	text = "This is a bot-generated list. Contact [[User:0x010C]] for more details.\n\n"
 	text += "'''"+str(len(all_titles))+" pages''' transcluing [[:"+src_lang+":"+searched_template+"]] on "+src_lang+".wikit doesn't exist here.\n\n"
 	for title in all_titles:
-		text += "* [[:"+src_lang+":"+title+"|"+title+u"]]  →  [["+title+"]]\n"
+		text += "* [[:"+src_lang+":"+title+"|"+title+u"]]  →  [["+title+"]] <small>[https://"+dst_lang+".wiktionary.org/w/index.php?action=edit&editintro="+editintro_template+"&title="+title+" (create)]</small>\n"
 	
 	pw_dst.replace("User:NeoBOT/list/"+searched_template, text, "Bot : Update list")
 
