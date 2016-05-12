@@ -10,7 +10,7 @@ import time
 import json
 import requests
 
-version = "v1.42"
+version = "v1.43"
 
 
 class Pywiki:
@@ -311,20 +311,24 @@ class Pywiki:
 	@param bool nocreate : if it's set to True, the edit will fail when the page doesn't exist
 	@param bool createonly : if it's set to True, the edit will fail when the page already exists
 	"""
-	def replace(self, titles, text, summary, nocreate=False, createonly=False):
-		if isinstance(titles, basestring):
+	def replace(self, titles, text, summary, nocreate=False, createonly=False, use_ids=False):
+		if isinstance(titles, (int, basestring)):
 			titles = [titles]
-		data={
+		prepare={
 			"action":"edit",
 			"assert":self.assertion,
 			"format":"json"
 		}
 		if nocreate:
-			data["nocreate"] = ""
+			prepare["nocreate"] = ""
 		elif createonly:
-			data["createonly"] = ""
+			prepare["createonly"] = ""
 		for title in titles:
-			data["title"] = title
+			data = prepare
+			if use_ids:
+				data['pageid'] = title
+			else:
+				data["title"] = title
 			data["text"] = text.replace("$(title)", title)
 			data["summary"] = summary.replace("$(title)", title)
 			data["token"] = self.get_csrf_token()
@@ -384,5 +388,34 @@ class Pywiki:
 			data["token"] = self.get_csrf_token()
 			r = self.session.post(self.api_endpoint, data=data)
 
+
+	def get_content(self, title):
+		response = self.request({
+			"action":"query",
+			"format":"json",
+			"prop":"revisions",
+			"titles":title,
+			"rvprop":"content",
+			"rvlimit":"1",
+			"assert":self.assertion,
+		})["query"]["pages"]
+		return response[response.keys()[0]]["revisions"][0]["*"]
+
+
+	def get_content_list(self, titles):
+		if isinstance(titles, basestring):
+			titles = [titles]
+		response = self.request({
+			"action":"query",
+			"format":"json",
+			"prop":"revisions",
+			"titles":"|".join(titles),
+			"rvprop":"content",
+			"assert":self.assertion,
+		})["query"]["pages"]
+		result = []
+		for id in response:
+			result += [[id, response[id]["revisions"][0]["*"]]]
+		return result
 
 
