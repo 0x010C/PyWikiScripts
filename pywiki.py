@@ -10,7 +10,7 @@ import time
 import json
 import requests
 
-version = "v1.43"
+version = "v1.45"
 
 
 class Pywiki:
@@ -346,7 +346,6 @@ class Pywiki:
 			data["text"] = text.replace("$(title)", title)
 			data["summary"] = summary.replace("$(title)", title)
 			data["token"] = self.get_csrf_token()
-			print data
 			r = self.request(data)
 
 
