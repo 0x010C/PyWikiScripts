@@ -64,6 +64,6 @@ def main():
 				j += 1
 		i += pw.limit
 		print "###"+str(i)
-	print "Nombre de pages modifiés : " + int(j)
+	print "Nombre de pages modifiés : " + str(j)
 main()
 

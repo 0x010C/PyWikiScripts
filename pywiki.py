@@ -50,17 +50,23 @@ class Pywiki:
 	Perform a given request with a simple but usefull error managment
 	"""
 	def request(self, data):		
-		relogin = 2
+		relogin = 3
 		while relogin:
-			r = self.session.post(self.api_endpoint, data=data)
-			response = json.loads(r.text)
-			if response.has_key("error"):
-				if response['error']['code'] == 'assertuserfailed':
-					self.login()
-					relogin -= 1
-					continue
-				break
-			return response
+			try:
+				r = self.session.post(self.api_endpoint, data=data)
+				response = json.loads(r.text)
+				if response.has_key("error"):
+					if response['error']['code'] == 'assertuserfailed':
+						self.login()
+						relogin -= 1
+						continue
+					break
+				return response
+			except requests.exceptions.ConnectionError:
+				time.sleep(5)
+				self.session = requests.Session()
+				self.login()
+				relogin -= 1
 		raise Exception('API error', response['error'])
 
 
@@ -106,6 +112,8 @@ class Pywiki:
 	"""
 	def revert(self, title, rev_id, summary):
 		token = self.get_csrf_token()
+		if self.assertion == "bot":
+			prepare["bot"] = "1"
 		r = self.session.post(self.api_endpoint, data={
 			"action":"edit",
 			"title":title,
@@ -263,6 +271,8 @@ class Pywiki:
 			"assert":self.assertion,
 			"format":"json"
 		}
+		if self.assertion == "bot":
+			prepare["bot"] = 1
 		if nocreate:
 			data["nocreate"] = ""
 		elif createonly:
@@ -291,6 +301,8 @@ class Pywiki:
 			"assert":self.assertion,
 			"format":"json"
 		}
+		if self.assertion == "bot":
+			prepare["bot"] = 1
 		if nocreate:
 			data["nocreate"] = ""
 		elif createonly:
@@ -317,8 +329,10 @@ class Pywiki:
 		prepare={
 			"action":"edit",
 			"assert":self.assertion,
-			"format":"json"
+			"format":"json",
 		}
+		if self.assertion == "bot":
+			prepare["bot"] = 1
 		if nocreate:
 			prepare["nocreate"] = ""
 		elif createonly:
@@ -332,7 +346,8 @@ class Pywiki:
 			data["text"] = text.replace("$(title)", title)
 			data["summary"] = summary.replace("$(title)", title)
 			data["token"] = self.get_csrf_token()
-			r = self.session.post(self.api_endpoint, data=data)
+			print data
+			r = self.request(data)
 
 
 	"""
