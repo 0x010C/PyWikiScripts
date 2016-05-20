@@ -34,6 +34,7 @@ def exist_talk_page(self, titles):
 		"format":"json",
 		"titles":talk_page_titles_join,
 		"prop":"info",
+		"inprop":"watchers",
 		"assert":self.assertion,
 	})
 	
@@ -44,7 +45,10 @@ def exist_talk_page(self, titles):
 		if int(id) > 0:
 			if not self.has_backlinks(page_list[id]["title"]):
 				if page_list[id].has_key("redirect"):
-					titles_redirect += [page_list[id]["title"]]
+					new = False
+					if page_list[id].has_key("new"):
+						new = True
+					titles_redirect += [[page_list[id]["title"], page_list[id]["watchers"], new]]
 				else:
 					titles_content += [page_list[id]["title"]]
 	return (titles_redirect,titles_content)
@@ -66,15 +70,12 @@ def main():
 		(titles, gar_continue) = pw.get_redirects(0, gar_continue)
 		(titles_redirect,titles_content) = pw.exist_talk_page(titles)
 		for t in titles_redirect:
-			print t
-			pw.delete(t, "Page de discussion d'une redirection")
+			if not t[2]:
+				print t
+			#pw.delete(t, "Page de discussion d'une redirection")
 			time.sleep(1)
 			j += 1
 		i += pw.limit
-		print str(i)+"#"+str(j)
-	#header_table = '{| class="wikitable"\n|-\n! Titre !! redirect=no !! suppression !! redirect ?'
-	#footer_table = '\n|}\n'
-	#pw.replace("Utilisateur:NeoBOT/Liste des pages de discussion de redirections", header_table + "\n".join('\n|-\n| [['+t[0]+']] || [https://fr.wikipedia.org/w/index.php?title='+urllib.quote_plus(t[0].encode('utf8'))+'&redirect=no (nr)] || [https://fr.wikipedia.org/w/index.php?title='+urllib.quote_plus(t[0].encode('utf8'))+'&action=delete&wpReason=Page%20de%20discussion%20d\'une%20redirection (suppr)] || '+t[1] for t in sorted_titles) + footer_table, "Mise à jour de la liste")
-
+		#print str(i)+"#"+str(j)
 main()
 
