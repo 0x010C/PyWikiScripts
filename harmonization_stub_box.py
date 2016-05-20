@@ -60,7 +60,7 @@ def main():
 			if content[1] != tmp:
 				tmp = regex.sub(ur"{{Ébauche", tmp)
 				print content[0]
-				pw.replace(content[0], tmp, u"Bot : Harmonisation des paramètres du bandeau [[Modèle:Ébauche|Ébauche]]", nocreate=True, use_ids=True)
+				pw.replace(content[0], tmp, u"Bot : Harmonisation des paramètres du bandeau [[Modèle:Ébauche|Ébauche]]", nocreate=True)
 				j += 1
 		i += pw.limit
 		print "###"+str(i)

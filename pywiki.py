@@ -152,7 +152,7 @@ class Pywiki:
 		titles = []
 		if "query" in response:
 			for i in response["query"]["pages"]:
-				titles += response["query"]["pages"][i]["title"].split(":")[1:]
+				titles += [response["query"]["pages"][i]["title"]]
 		return (titles,gcm_continue)
 
 
@@ -429,7 +429,7 @@ class Pywiki:
 		})["query"]["pages"]
 		result = []
 		for id in response:
-			result += [[id, response[id]["revisions"][0]["*"]]]
+			result += [[response[id]["title"], response[id]["revisions"][0]["*"]]]
 		return result
 
 
