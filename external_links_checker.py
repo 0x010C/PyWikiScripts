@@ -34,9 +34,14 @@ def main():
 			if "extlinks" in response["query"]["pages"][id]:
 				#print response["query"]["pages"][id]["title"]
 				for extlink in response["query"]["pages"][id]["extlinks"]:
-					r = requests.get(extlink["*"])
-					if r.status_code != 200:
-						print response["query"]["pages"][id]["title"]+" --> ("+str(r.status_code)+") "+extlink["*"]
+					try:
+						r = requests.get(extlink["*"])
+						if r.status_code != 200:
+							print response["query"]["pages"][id]["title"]+" --> ("+str(r.status_code)+") "+extlink["*"]
+					except requests.exceptions.ConnectionError:
+						print response["query"]["pages"][id]["title"]+" --> (DOM) "+extlink["*"]
+					except requests.exceptions.TooManyRedirects:
+						print response["query"]["pages"][id]["title"]+" --> (RED) "+extlink["*"]
 	
 		if "continue" in response:
 			if response["continue"]["continue"] == "gapcontinue||":
