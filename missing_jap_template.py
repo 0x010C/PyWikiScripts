@@ -4,9 +4,6 @@
 #Date: 20 Mai 2016
 #License: GNU GPL v3
 
-import sys
-import time
-import json
 import pywiki
 import re
 

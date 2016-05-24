@@ -4,8 +4,6 @@
 #Date: 12 May 2016
 #License: GNU GPL v3
 
-import sys
-import json
 import pywiki
 import re
 
