@@ -13,6 +13,7 @@ from collections import deque
 
 lock = threading.Lock()
 links = deque()
+nb_article_crawled = 0
 
 class LinkChecker (threading.Thread):
 	def __init__(self, threadID):
@@ -24,7 +25,7 @@ class LinkChecker (threading.Thread):
 			with lock:
 				try:
 					(title, link) = links.popleft()
-					print str(self.threadID)+"#"+str(len(links))
+					print str(nb_article_crawled)+"#"+str(len(links))
 				except IndexError:
 					print "pause"+str(self.threadID)
 					link = None
@@ -46,13 +47,13 @@ class LinkChecker (threading.Thread):
 
 # Main
 def main():
-	global links
+	global links, nb_article_crawled
 	pw = pywiki.Pywiki("frwiki-NeoBOT")
 	pw.login()
 	pw.limit = 500
 	
 	threads = []
-	for i in range(0,64):
+	for i in range(0,256):
 		threads.append(LinkChecker(i))
 		threads[i].start()
 	
@@ -61,7 +62,7 @@ def main():
 	while gap_continue != None:
 		need_more_links = False
 		with lock:
-			if len(links) < 200:
+			if len(links) < 700:
 				need_more_links = True
 		
 		if need_more_links:
@@ -90,6 +91,7 @@ def main():
 				if response["continue"]["continue"] == "gapcontinue||":
 					gap_continue = response["continue"]["gapcontinue"]
 					le_offset = 0
+					nb_article_crawled += pw.limit
 				else:
 					le_offset = response["continue"]["eloffset"]
 			else:
