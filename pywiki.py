@@ -62,7 +62,7 @@ class Pywiki:
 						continue
 					break
 				return response
-			except requests.exceptions.ConnectionError:
+			except requests.exceptions.ConnectionError,OpenSSL.SSL.ZeroReturnError:
 				time.sleep(5)
 				self.session = requests.Session()
 				self.login()
