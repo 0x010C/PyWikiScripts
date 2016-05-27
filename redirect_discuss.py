@@ -59,8 +59,9 @@ pywiki.Pywiki.exist_talk_page = exist_talk_page
 
 # Main
 def main():
-	pw = pywiki.Pywiki("frwiki-0x010C")
+	pw = pywiki.Pywiki("frwiki-NeoBOT")
 	pw.login()
+	pw.limit = 500
 	
 	gar_continue = ""
 	i=0
@@ -70,12 +71,12 @@ def main():
 		(titles, gar_continue) = pw.get_redirects(0, gar_continue)
 		(titles_redirect,titles_content) = pw.exist_talk_page(titles)
 		for t in titles_redirect:
-			if not t[2]:
+			if t[2]:
 				print t
-			#pw.delete(t, "Page de discussion d'une redirection")
-			time.sleep(1)
-			j += 1
+				pw.delete(t[0], "Page de discussion d'une redirection")
+				time.sleep(1)
+				j += 1
 		i += pw.limit
-		#print str(i)+"#"+str(j)
+		print str(i)+"#"+str(j)
 main()
 
