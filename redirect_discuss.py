@@ -74,7 +74,7 @@ def main():
 			if t[2]:
 				print t
 				pw.delete(t[0], "Page de discussion d'une redirection")
-				time.sleep(1)
+				time.sleep(0.3)
 				j += 1
 		i += pw.limit
 		print str(i)+"#"+str(j)
