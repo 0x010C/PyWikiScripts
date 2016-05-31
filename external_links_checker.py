@@ -24,6 +24,11 @@ blacklist = [
 	"www.minorplanetcenter.net",
 ]
 
+headers = {
+	'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
+}
+
+
 class LinkChecker (threading.Thread):
 	def __init__(self, threadID):
 		threading.Thread.__init__(self)
@@ -45,7 +50,7 @@ class LinkChecker (threading.Thread):
 			
 			found = False
 			try:
-				r = requests.get(link)
+				r = requests.get(link, headers=headers)
 				if r.status_code != 200:
 					print title+" --> ("+str(r.status_code)+") "+link
 					found = True
