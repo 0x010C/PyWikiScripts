@@ -387,6 +387,7 @@ class Pywiki:
 
 	"""
 	Delete some pages
+	TODO: Check rights and raise an error if needed
 	"""
 	def delete(self, titles, reason):
 		if isinstance(titles, basestring):
@@ -399,6 +400,35 @@ class Pywiki:
 		}
 		for title in titles:
 			data["title"] = title
+			data["token"] = self.get_csrf_token()
+			r = self.session.post(self.api_endpoint, data=data)
+
+
+	"""
+	Move some pages
+	TODO: Raise an error when len(old_titles) != len(new_titles)
+	TODO: Check rights and raise an error if needed
+	"""
+	def move(self, old_titles, new_titles, reason, no_redirect=False, move_talk=False, ignore_warnings=False):
+		if isinstance(old_titles, basestring):
+			old_titles = [old_titles]
+		if isinstance(new_titles, basestring):
+			new_titles = [new_titles]
+	
+		data = {
+			"action":"move",
+			"format":"json",
+			"reason":reason,
+		}
+		if no_redirect:
+		    data["noredirect"] = "1"
+		if move_talk:
+		    data["movetalk"] = "1"
+		if ignore_warnings:
+		    data["ignorewarnings"] = "1"
+		for i in xrange(len(old_titles)):
+			data["from"] = old_titles[i]
+			data["to"] = new_titles[i]
 			data["token"] = self.get_csrf_token()
 			r = self.session.post(self.api_endpoint, data=data)
 
