@@ -3,6 +3,7 @@
 #Autor: Antoine "0x010C" Lamielle
 #Date: 30 June 2016
 #License: GNU GPL v3
+#Usage: python move_category.py -o "Old category name" -n "New category name" --move --delete
 
 import sys
 import re
@@ -17,7 +18,7 @@ def main():
     if "-o" in sys.argv:
         index = sys.argv.index("-o")
         if len(sys.argv) >= index:
-            old_cat = sys.argv[index+1]
+            old_cat = sys.argv[index+1].decode("utf-8")
         else:
             print "Missing category name after parameter -o"
             sys.exit()
@@ -28,7 +29,7 @@ def main():
     if "-n" in sys.argv:
         index = sys.argv.index("-n")
         if len(sys.argv) >= index:
-            new_cat = sys.argv[index+1]
+            new_cat = sys.argv[index+1].decode("utf-8")
         else:
             print "Missing category name after parameter -n"
             sys.exit()
@@ -38,7 +39,7 @@ def main():
 
     regex = re.compile(ur'(\n?\[\[ *(?:Category|Catégorie) *: ?)'+old_cat+ur'( *(?:| *[^\]]+ *)?\]\])', re.DOTALL | re.IGNORECASE)
     
-    pw = pywiki.Pywiki("testwiki-0x010C")
+    pw = pywiki.Pywiki("frwiki-NeoBOT")
     pw.login()
     pw.limit = 500
     titles = pw.get_all_pages_in_cat("Category:"+old_cat)
@@ -56,6 +57,8 @@ def main():
                 pw.replace(title, new_content, u"Bot : Remplacement de [[Catégorie:"+old_cat+u"]] par [[Catégorie:"+new_cat+u"]]", nocreate=True)
         titles = titles[500:]
     
+    pw = pywiki.Pywiki("frwiki-0x010C")
+    pw.login()
     if "--move" in sys.argv:
         if "--delete" in sys.argv:
             no_redirect = True
