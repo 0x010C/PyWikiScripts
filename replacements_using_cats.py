@@ -6,99 +6,84 @@
 #Usage example: python replacements_using_cats.py -c "Portail:Castille-et-León/Articles liés" -o "({{ ?[EÉeé]bauche[^}]*\| ?)commune d'Espagne( ?[}|])" -n "\1commune d'Aragon\2" -s "Bot : Remplacement de '{{ébauche|commune d'Espagne}}' par '{{ébauche|commune de Castille-et-León}}'" --regex --dotall --ignorecase
 
 import pywiki
+import pwutils
 import re
 import sys
 
 
-harmonization_table = [
-    #category   text to find    text to put instead
-    [u"Portail:Aragon/Articles liés", u"{{ébauche|commune d'Espagne}}", u"{{ébauche|commune d'Aragon}}"],
-]
+pw = None
+
 
 # Main
+def cat_replace(category, old_text, new_text, summary, recursive=False, use_regex=False, regex_flags=0, namespace=pywiki.NS_MAIN):
+    i=0
+    j=0
+    
+    
+    all_cats = set(["Category:"+category])
+    if recursive:
+        to_search = set(["Category:"+category])
+        while to_search:
+            gcm_continue = ""
+            current_cat = to_search.pop()
+            while gcm_continue != None:
+                (cats, gcm_continue) = pw.get_pages_in_cat(current_cat, pywiki.NS_CATEGORY, gcm_continue)
+                for cat in cats:
+                    if cat not in all_cats:
+                        to_search.add(cat)
+                        all_cats.add(cat)
+                
+    for cat in all_cats:
+        gcm_continue = ""
+        while gcm_continue != None:
+            (titles, gcm_continue) = pw.get_pages_in_cat(cat, namespace, gcm_continue)
+            contents = pw.get_content_list(titles)
+            
+            for content in contents:
+                if use_regex:
+                    tmp = re.sub(old_text, new_text, content[1])
+                else:
+                    tmp = content[1].replace(old_text, new_text)
+                if content[1] != tmp:
+                    print content[0]
+                    pw.replace(content[0], tmp, summary, nocreate=True)
+                    j += 1
+                i += 1
+    print "Nombre de pages parcourues : " + str(i)
+    print "Nombre de pages modifiées :  " + str(j)
+
+#arg_parser(arg_name, value=False, required=False, default=False)
+
 def main():
-    category = ""
-    old_text = ""
-    new_text = ""
-    summary = ""
-    use_regex = False
-    regex_flags = 0
+    global pw
     
-    if "--regex" in sys.argv:
-        use_regex = True
-        if "--dotall" in sys.argv:
-            regex_flags = re.DOTALL
-        if "--ignorecase" in sys.argv:
-            regex_flags = regex_flags | re.IGNORECASE
-    
-    if "-o" in sys.argv:
-        index = sys.argv.index("-o")
-        if len(sys.argv) >= index:
-            old_text = sys.argv[index+1].decode("utf-8")
-            if use_regex:
-                old_text = re.compile(old_text, regex_flags);
-        else:
-            print "Missing value after parameter -o"
-            sys.exit()
-    else:
-        print "Missing parameter -o"
-        sys.exit()
-    
-    if "-n" in sys.argv:
-        index = sys.argv.index("-n")
-        if len(sys.argv) >= index:
-            new_text = sys.argv[index+1].decode("utf-8")
-        else:
-            print "Missing value after parameter -n"
-            sys.exit()
-    else:
-        print "Missing parameter -n"
-        sys.exit()
-    
-    if "-c" in sys.argv:
-        index = sys.argv.index("-c")
-        if len(sys.argv) >= index:
-            category = sys.argv[index+1].decode("utf-8")
-        else:
-            print "Missing category name after parameter -c"
-            sys.exit()
-    else:
-        print "Missing parameter -c"
-        sys.exit()
-    
-    if "-s" in sys.argv:
-        index = sys.argv.index("-s")
-        if len(sys.argv) >= index:
-            summary = sys.argv[index+1].decode("utf-8")
-        else:
-            print "Missing value after parameter -s"
-            sys.exit()
-    else:
-        summary = u"Bot : Remplacement de '"+old_text+u"' par '"+new_text+u"' dans la catégorie [[Category:"+category+u"|"+category+u"]]"
-    
-    
-    pw = pywiki.Pywiki("frwiki-NeoBOT")
+    pw = pywiki.Pywiki("testwiki-NeoBOT")
     pw.login()
     pw.limit = 500
     
-    gcm_continue = ""
-    i=0
-    j=0
-    while gcm_continue != None:
-        (titles, gcm_continue) = pw.get_pages_in_cat("Category:"+category, gcm_continue=gcm_continue)
-        contents = pw.get_content_list(titles)
+    mass = pwutils.arg_parser("--mass", value=True, required=False, default=False)
+    if mass:
+        pass #TODO
+    else:
+        category = pwutils.arg_parser("-c", value=True, required=True)
+        old_text = pwutils.arg_parser("-o", value=True, required=True)
+        new_text = pwutils.arg_parser("-n", value=True, required=True)
+        summary = pwutils.arg_parser("-s", value=True, default=u"Bot : Remplacement de '"+old_text+u"' par '"+new_text+u"' dans la catégorie [[Category:"+category+u"|"+category+u"]]")
+        recursive = pwutils.arg_parser("--recursive")
+        namespace = pwutils.arg_parser("--namespace", value=True, default=pywiki.NS_MAIN)
+        use_regex = pwutils.arg_parser("--regex")
+        regex_flags = ""
+        if use_regex:
+            if pwutils.arg_parser("--dotall"):
+                regex_flags = re.DOTALL
+            if pwutils.arg_parser("--ignorecase"):
+                regex_flags = regex_flags | re.IGNORECASE
+            old_text = re.compile(old_text, regex_flags);
         
-        for content in contents:
-            if use_regex:
-                tmp = re.sub(old_text, new_text, content[1])
-            else:
-                tmp = content[1].replace(old_text, new_text)
-            if content[1] != tmp:
-                print content[0]
-                pw.replace(content[0], tmp, summary, nocreate=True)
-                j += 1
-            i += 1
-    print "Nombre de pages parcourues : " + str(i)
-    print "Nombre de pages modifiés : " + str(j)
+        cat_replace(category, old_text, new_text, summary, recursive, use_regex, regex_flags, namespace)
+
+
+
+
 main()
 
