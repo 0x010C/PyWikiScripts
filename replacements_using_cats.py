@@ -63,7 +63,11 @@ def main():
     
     mass = pwutils.arg_parser("--mass", value=True, required=False, default=False)
     if mass:
-        pass #TODO
+        sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/conf/")
+        mass_replacement = __import__(mass, globals(), locals(), [], -1).mass_replacement
+        for request in mass_replacement:
+            cat_replace(request[0], request[1], request[2], request[3], request[4], request[5], request[6], request[7])
+        
     else:
         category = pwutils.arg_parser("-c", value=True, required=True)
         old_text = pwutils.arg_parser("-o", value=True, required=True)
