@@ -48,7 +48,7 @@ def exist_talk_page(self, titles):
 					new = False
 					if page_list[id].has_key("new"):
 						new = True
-					titles_redirect += [[page_list[id]["title"], page_list[id]["watchers"], new]]
+					titles_redirect += [[page_list[id]["title"], new]] #TODO: check, watchers seems not be returned any more
 				else:
 					titles_content += [page_list[id]["title"]]
 	return (titles_redirect,titles_content)
@@ -59,7 +59,7 @@ pywiki.Pywiki.exist_talk_page = exist_talk_page
 
 # Main
 def main():
-	pw = pywiki.Pywiki("frwiki-NeoBOT")
+	pw = pywiki.Pywiki("frwiki-0x010C")
 	pw.login()
 	pw.limit = 500
 	
@@ -71,7 +71,7 @@ def main():
 		(titles, gar_continue) = pw.get_redirects(0, gar_continue)
 		(titles_redirect,titles_content) = pw.exist_talk_page(titles)
 		for t in titles_redirect:
-			if t[2]:
+			if t[1]: #If the page is tagged with "new" (== if there is only one diff)
 				print t
 				pw.delete(t[0], "Page de discussion d'une redirection")
 				time.sleep(0.3)
