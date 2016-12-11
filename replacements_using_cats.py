@@ -27,18 +27,17 @@ def cat_replace(category, old_text, new_text, summary, recursive=False, use_rege
             gcm_continue = ""
             current_cat = to_search.pop()
             while gcm_continue != None:
-                (cats, gcm_continue) = pw.get_pages_in_cat(current_cat, pywiki.NS_CATEGORY, gcm_continue)
+                (cats, gcm_continue) = pw.get_pages_in_cat(current_cat, gcm_type="subcat", gcm_continue=gcm_continue)
                 for cat in cats:
                     if cat not in all_cats:
                         to_search.add(cat)
                         all_cats.add(cat)
-                
+
     for cat in all_cats:
         gcm_continue = ""
         while gcm_continue != None:
-            (titles, gcm_continue) = pw.get_pages_in_cat(cat, namespace, gcm_continue)
+            (titles, gcm_continue) = pw.get_pages_in_cat(cat, gcm_type="page", gcm_continue=gcm_continue)
             contents = pw.get_content_list(titles)
-            
             for content in contents:
                 if use_regex:
                     tmp = re.sub(old_text, new_text, content[1])
@@ -52,12 +51,10 @@ def cat_replace(category, old_text, new_text, summary, recursive=False, use_rege
     print "Nombre de pages parcourues : " + str(i)
     print "Nombre de pages modifiées :  " + str(j)
 
-#arg_parser(arg_name, value=False, required=False, default=False)
-
 def main():
     global pw
     
-    pw = pywiki.Pywiki("testwiki-NeoBOT")
+    pw = pywiki.Pywiki("frwiki-NeoBOT")
     pw.login()
     pw.limit = 500
     

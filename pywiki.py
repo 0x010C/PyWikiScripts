@@ -10,7 +10,6 @@ import time
 import json
 import requests
 
-version = "v1.45"
 
 NS_MAIN = 0
 NS_TALK = 1
@@ -153,18 +152,17 @@ class Pywiki:
     """
     Get N pages of a category, starting at offset gcm_continue if given
     """
-    def get_pages_in_cat(self, category, ns=None, gcm_continue=""):
+    def get_pages_in_cat(self, category, ns=None, gcm_type="subcat|page|file", gcm_continue=""):
         if ns == None:
             ns = ""
         elif isinstance(ns, list):
             ns = "|".join(str(i) for i in ns)
-
         r = self.session.post(self.api_endpoint, data={
             "action":"query",
             "format":"json",
             "generator":"categorymembers",
             "gcmtitle":category,
-            "gcmnamespace":ns,
+            "gcmtype":gcm_type,
             "gcmlimit":self.limit,
             "gcmcontinue":gcm_continue,
         })
@@ -249,6 +247,90 @@ class Pywiki:
         all_titles = []
         while ti_continue != None:
             (titles, ti_continue) = self.get_transcluded_pages(title, ns, ti_continue)
+            all_titles += titles
+        return all_titles
+
+
+    """
+    Get N pages that links to a page
+    """
+    def get_linking_pages(self, title, ns=None, lh_continue=""):
+        if ns == None:
+            ns = ""
+        elif isinstance(ns, list):
+            ns = "|".join(str(i) for i in ns)
+    
+        r = self.session.post(self.api_endpoint, data={
+            "action":"query",
+            "format":"json",
+            "prop":"linkshere",
+            "titles":title,
+            "lhprop":"title",
+            "lhnamespace":ns,
+            "lhlimit":self.limit,
+            "lhcontinue":lh_continue,
+        })
+        print r.status_code
+        response = json.loads(r.text)
+        if "continue" in response:
+            lh_continue = response["continue"]["lhcontinue"]
+        else:
+            lh_continue = None
+        print response
+        titles = []
+        if "query" in response:
+            raw_titles = response["query"]["pages"].itervalues().next()["linkshere"]
+            for title in raw_titles:
+                titles += [title["title"]]
+        return (titles,lh_continue)
+
+
+    """
+    Get all pages that links to a page
+    """
+    def get_all_linking_pages(self, title, ns=None):
+        lh_continue = ""
+        all_titles = []
+        while lh_continue != None:
+            (titles, lh_continue) = self.get_linking_pages(title, ns, lh_continue)
+            all_titles += titles
+        return all_titles
+    """
+    Get the N first redirect pages of the wiki
+    """
+    def get_pages(self, ns=None, gap_continue=""):
+        data = {
+            "action":"query",
+            "format":"json",
+            "generator":"allpages",
+            "gaplimit":self.limit,
+            "assert":self.assertion,
+        }
+        if ns != None:
+            data["gapnamespace"] = ns
+        if gap_continue != "":
+            data["gapcontinue"] = gap_continue
+        response = self.request(data)
+        
+        if "continue" in response:
+            gap_continue = response["continue"]["gapcontinue"]
+        else:
+            gap_continue = None
+        page_list = response["query"]["pages"]
+        titles = []
+        for id in page_list:
+            if page_list[id].has_key("title"):
+                titles += [page_list[id]["title"]]
+        return (titles,gap_continue)
+
+    """
+    Get all redirect pages of the wiki
+    """
+    def get_all_pages(self, ns=None):
+        gap_continue = ""
+        all_titles = []
+        while gap_continue != None:
+            (titles, gap_continue) = self.get_pages(ns, gap_continue)
             all_titles += titles
         return all_titles
 
