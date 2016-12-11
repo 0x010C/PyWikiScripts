@@ -16,14 +16,19 @@ supported_anime = {
     u"Naruto Shippuden": [u"Naruto Shippuden", u"Naruto Shippuden"],
     u"One Piece": [u"One Piece", u"One Piece"],
 }
-
 rss_url = u"http://www.crunchyroll.com/rss/anime?lang=en"
+wiki_data_page = u"Module:Nombre d'épisodes d'anime/data"
+
 feed = feedparser.parse(rss_url)
 
 pw = pywiki.Pywiki("frwiki-NeoBOT")
 pw.login()
 
+content = pw.get_content(wiki_data_page);
+
 def anime_update(feed_title, wiki_title):
+    global content
+    
     for post in feed.entries:
         if feed_title in post.title:
             nbepisode = post.title
@@ -33,8 +38,6 @@ def anime_update(feed_title, wiki_title):
 
     match = re.search(ur'Episode (\d+)', nbepisode)
     nbepisode = match.group(1)
-    
-    content = pw.get_content(u"Module:Nombre d'épisodes d'anime/data");
 
     match = re.search(ur'\s*?\["'+wiki_title+'"\]\s*?=\s*?(\d+)\s*?,', content)
     oldnbepisode = match.group(1)
@@ -47,24 +50,27 @@ def anime_update(feed_title, wiki_title):
       
     if nbepisode > oldnbepisode:
         content = re.sub(ur'(\s*?\["'+wiki_title+'"\]\s*?=\s*?)\d+(\s*?,)', ur'\g<1>%d\g<2>' % (nbepisode), content)
-        pw.replace(u"Module:Nombre d'épisodes d'anime/data", content, u"Mise à jour du nombre d’épisodes de [["+wiki_title+"]] depuis Crunchyroll.")
-        print(u'Page saved.\n')
+        print(u'Content updated.\n')
     else :
-        print(u'Page not saved.\n')
+        print(u'Nothing changed.\n')
         
 
-def main():    
+def main():
+    global content
     if pwutils.arg_parser("--all"):
         for title in supported_anime:
             try:
                 anime_update(supported_anime[title][0], supported_anime[title][1])
             except:
                 print(u'[[%s]]' % supported_anime[title][1])
-                print('No data found for this anime.')
+                print('No data found for this anime.\n')
     else:
         title = pwutils.arg_parser("-t", value=True, required=True)
         if title not in supported_anime:
             raise Exception("This anime is not currently supported.")
         anime_update(supported_anime[title][0], supported_anime[title][1])
+    
+    pw.replace(wiki_data_page, content, u"Mise à jour depuis Crunchyroll.")
+    print('Saved.')
 
 main()
