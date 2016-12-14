@@ -15,7 +15,6 @@ import pywiki
 
 queues  = [
 	{"page":u"Wikipédia:OTRS/backlog-info-fr", "id":u"19"},
-	{"page":u"Wikipédia:OTRS/backlog-permissions-commons-fr", "id":u"127"},
 	{"page":u"Wikipédia:OTRS/backlog-permissions-fr", "id":u"35"},
 	{"page":u"Wikipédia:OTRS/backlog-photosubmission-fr", "id":u"129"},
 ]
