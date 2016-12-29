@@ -114,7 +114,7 @@ def main():
 		else:
 			age = "0"
 		pw.replace(queues[i]['page'], age, u"Mise à jour du backlog des files OTRS francophones", nocreate=True)
-		print queues[i]['page'] + " : " + age + " jours"
+		print queues[i]['page'].encode("utf-8") + " : " + age + " jours"
 
 
 main()
