@@ -72,11 +72,14 @@ class Pywiki:
     """
     Perform a given request with a simple but usefull error managment
     """
-    def request(self, data):        
+    def request(self, data, files=None):        
         relogin = 3
         while relogin:
             try:
-                r = self.session.post(self.api_endpoint, data=data)
+                if files == None:
+                    r = self.session.post(self.api_endpoint, data=data)
+                else:
+                    r = self.session.post(self.api_endpoint, data=data, files=files)
                 response = json.loads(r.text)
                 if response.has_key("error"):
                     if response['error']['code'] == 'assertuserfailed':
@@ -586,4 +589,31 @@ class Pywiki:
             
         return result
 
+    def upload(self, filename, path, text, summary=""):
+        response = self.request({
+            "action": "upload",
+            "format": "json",
+            "filename": filename,
+            "comment": summary,
+            "text": text,
+            "token": self.get_csrf_token(),
+        },
+        {
+            "file": open(path, 'rb')
+        })
 
+    """
+    def chuncked_upload(self, ):
+        
+    def url_upload(self, ):
+    {
+    "action": "upload",
+    "format": "json",
+    "filename": "Image.jpg",
+    "comment": "upload via pywiki.py",
+    "text": "Text de la page",
+    "url": "http://images1.bonhams.com/image?src=Images/live/2016-11/21/24068865-4-1.jpg&tile=1:1",
+    "token": "14c0e81166da6b3d6f805c113ab4f04658a846cd+\\"
+    }
+    """
+    
