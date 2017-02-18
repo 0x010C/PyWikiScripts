@@ -69,7 +69,7 @@ def main():
                 if description_en:
                     description += '\n{{en|'+description_en+'}}'
                 
-                if '{{'+medium+'}}':
+                if '{{'+medium+'}}' in mediums:
                     medium = '{{'+medium+'}}'
                 
                 if institution:
