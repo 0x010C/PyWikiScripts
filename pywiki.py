@@ -395,7 +395,7 @@ class Pywiki:
             "format":"json"
         }
         if self.assertion == "bot":
-            prepare["bot"] = 1
+            data["bot"] = 1
         if nocreate:
             data["nocreate"] = ""
         elif createonly:
@@ -425,7 +425,7 @@ class Pywiki:
             "format":"json"
         }
         if self.assertion == "bot":
-            prepare["bot"] = 1
+            data["bot"] = 1
         if nocreate:
             data["nocreate"] = ""
         elif createonly:
