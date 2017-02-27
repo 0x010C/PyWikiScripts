@@ -59,6 +59,7 @@ class Pywiki:
         config = __import__(config_name, globals(), locals(), [], -1)
         
         self.user = config.user
+	self.basic_user_name = self.user.split("@")[0]
         self.password = config.password
         self.api_endpoint = config.api_endpoint
         self.assertion = config.assertion

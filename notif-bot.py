@@ -66,7 +66,7 @@ def main():
 			title = "\n== " + name.join(reply["section_title"].split("$1")) + " ==\n"
 			text = name.join(reply["content"].split("$1"))
 			summary = name.join(reply["summary"].split("$1"))
-			pw.append('User_talk:' + pw.user, title + text, summary, nocreate=True)
+			pw.append('User_talk:' + pw.basic_user_name, title + text, summary, nocreate=True)
 		pw.clean_notifications(IDs)
 		time.sleep(180)
 
