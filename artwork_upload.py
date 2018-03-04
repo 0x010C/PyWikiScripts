@@ -9,6 +9,9 @@ import pwutils
 import csv
 import os
 from datetime import date
+import sys
+import requests
+import shutil
 
 
 template = """== {{int:filedesc}} ==
@@ -34,6 +37,9 @@ mediums = ['{{Azulejo}}', '{{Bronze}}', '{{Drawing}}', '{{Engraving}}', '{{Etchi
 
 
 def uploader(file_name, artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list):
+    pw = pywiki.Pywiki("commonswiki-0x010C")
+    pw.login()
+
     artist = artist.strip()
     title = title.strip()
     
@@ -86,43 +92,44 @@ def uploader(file_name, artist, birth, death, title, description_en, description
     print "File '"+title+"' uploaded"
     
 
-    def prompt():
-        print "artist:\n> ",;artist = sys.stdin.readline().split("\n")[0]
-        print "birth:\n> ",;birth = sys.stdin.readline().split("\n")[0]
-        print "death:\n> ",;death = sys.stdin.readline().split("\n")[0]
-        print "title:\n> ",;title = sys.stdin.readline().split("\n")[0]
-        print "description (en):\n> ",;description_en = sys.stdin.readline().split("\n")[0]
-        print "description (fr):\n> ",;description_fr = sys.stdin.readline().split("\n")[0]
-        print "object type (e.g. 'painting'):\n> ",;object_type = sys.stdin.readline().split("\n")[0]
-        print "date:\n> ",;art_date = sys.stdin.readline().split("\n")[0]
-        print "medium (e.g. 'Oil on canvas'):\n> ",;medium = sys.stdin.readline().split("\n")[0]
-        print "width:\n> ",;width = sys.stdin.readline().split("\n")[0]
-        print "height:\n> ",;height = sys.stdin.readline().split("\n")[0]
-        print "institution (e.g. 'Louvre':\n> ",;institution = sys.stdin.readline().split("\n")[0]
-        print "inscriptions:\n> ",;inscriptions = sys.stdin.readline().split("\n")[0]
-        print "source:\n> ",;source = sys.stdin.readline().split("\n")[0]
-        print "categories (separated by a ';'):\n> ",;categories_list = sys.stdin.readline().split("\n")[0]
-        return (artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list)
+def info_prompt():
+    print "artist:\n> ",;artist = sys.stdin.readline().split("\n")[0]
+    print "birth:\n> ",;birth = sys.stdin.readline().split("\n")[0]
+    print "death:\n> ",;death = sys.stdin.readline().split("\n")[0]
+    print "title:\n> ",;title = sys.stdin.readline().split("\n")[0]
+    print "description (en):\n> ",;description_en = sys.stdin.readline().split("\n")[0]
+    print "description (fr):\n> ",;description_fr = sys.stdin.readline().split("\n")[0]
+    print "object type (e.g. 'painting'):\n> ",;object_type = sys.stdin.readline().split("\n")[0]
+    print "date:\n> ",;art_date = sys.stdin.readline().split("\n")[0]
+    print "medium (e.g. 'Oil on canvas'):\n> ",;medium = sys.stdin.readline().split("\n")[0]
+    print "width:\n> ",;width = sys.stdin.readline().split("\n")[0]
+    print "height:\n> ",;height = sys.stdin.readline().split("\n")[0]
+    print "institution (e.g. 'Louvre':\n> ",;institution = sys.stdin.readline().split("\n")[0]
+    print "inscriptions:\n> ",;inscriptions = sys.stdin.readline().split("\n")[0]
+    print "source:\n> ",;source = sys.stdin.readline().split("\n")[0]
+    print "categories (separated by a ';'):\n> ",;categories_list = sys.stdin.readline().split("\n")[0]
+
+    return (artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list)
 
 
 
 # Main
+path = ""
+global_categories = []
 def main():
-    global path, global_categories
-    pw = pywiki.Pywiki("commonswiki-0x010C")
-    pw.login()
+    global path, global_categories, pw
 
     path = pwutils.arg_parser("-p", value=True)
-    if path[-1] != '/':
-        path = path + '/'
     csv_file_path = pwutils.arg_parser("-f", value=True)
-    global_categories = pwutils.arg_parser("-c", value=True).encode("utf-8")
+    global_categories = pwutils.arg_parser("-c", value=True)
     if global_categories:
-        global_categories = global_categories.split(';')
+        global_categories = global_categories.encode("utf-8").split(';')
     else:
         global_categories = []
 
     if path and csv_file_path:
+        if path[-1] != '/':
+            path = path + '/'
         with open(csv_file_path, 'rb') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter='&', quotechar='"')
             for row in csv_reader:
@@ -137,9 +144,9 @@ def main():
     image_response = requests.get(url, stream=True)
     with open('./tmp.jpg', 'wb') as out_file:
         shutil.copyfileobj(image_response.raw, out_file)
-    del response
+    del image_response
     
-    (artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list) = prompt()
+    (artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list) = info_prompt()
     
     uploader("tmp.jpg", artist, birth, death, title, description_en, description_fr, object_type, art_date, medium, width, height, institution, inscriptions, source, categories_list)
     
