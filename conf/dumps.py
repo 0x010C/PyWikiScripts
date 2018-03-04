@@ -56,6 +56,6 @@ wiki_list = [
     #Autres
     "commonswiki",
     "wikidatawiki",
-    "dewiki",
+#    "dewiki",
 ]
 

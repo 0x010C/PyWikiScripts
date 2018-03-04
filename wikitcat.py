@@ -41,7 +41,7 @@ def main():
 	for title in all_titles:
 		text += "* [[:"+src_lang+":"+title+"|"+title+u"]]  →  [["+title+"]] <small>[https://"+dst_lang+".wiktionary.org/w/index.php?action=edit&editintro="+editintro_template+"&title="+title+u" (créer)]</small>\n"
 	
-	pw_dst.replace("User:NeoBOT/list/"+searched_template, text, "Bot : Update list")
+	pw_dst.replace("User:NeoBot/list/"+searched_template, text, "Bot : Update list")
 
 
 main()

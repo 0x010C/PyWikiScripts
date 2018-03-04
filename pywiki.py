@@ -57,7 +57,7 @@ class Pywiki:
             file.close()
         sys.path.append(user_path)
         config = __import__(config_name, globals(), locals(), [], -1)
-        
+
         self.user = config.user
         self.password = config.password
         self.api_endpoint = config.api_endpoint
@@ -66,13 +66,13 @@ class Pywiki:
             self.limit = 5000
         else:
             self.limit = 500
-        
+
         self.session = requests.Session()
 
     """
     Perform a given request with a simple but usefull error managment
     """
-    def request(self, data, files=None):        
+    def request(self, data, files=None):
         relogin = 3
         while relogin:
             try:
@@ -80,6 +80,7 @@ class Pywiki:
                     r = self.session.post(self.api_endpoint, data=data)
                 else:
                     r = self.session.post(self.api_endpoint, data=data, files=files)
+                    print r.text
                 response = json.loads(r.text)
                 if response.has_key("error"):
                     if response['error']['code'] == 'assertuserfailed':
@@ -200,7 +201,7 @@ class Pywiki:
                         if cat not in all_cats:
                             to_search.add(cat)
                             all_cats.add(cat)
-                
+
         for cat in all_cats:
             gcm_continue = ""
             while gcm_continue != None:
@@ -217,7 +218,7 @@ class Pywiki:
             ns = ""
         elif isinstance(ns, list):
             ns = "|".join(str(i) for i in ns)
-    
+
         r = self.session.post(self.api_endpoint, data={
             "action":"query",
             "format":"json",
@@ -233,7 +234,7 @@ class Pywiki:
             ti_continue = response["continue"]["ticontinue"]
         else:
             ti_continue = None
-            
+
         titles = []
         if "query" in response:
             raw_titles = response["query"]["pages"].itervalues().next()["transcludedin"]
@@ -262,7 +263,7 @@ class Pywiki:
             ns = ""
         elif isinstance(ns, list):
             ns = "|".join(str(i) for i in ns)
-    
+
         r = self.session.post(self.api_endpoint, data={
             "action":"query",
             "format":"json",
@@ -314,7 +315,7 @@ class Pywiki:
         if gap_continue != "":
             data["gapcontinue"] = gap_continue
         response = self.request(data)
-        
+
         if "continue" in response:
             gap_continue = response["continue"]["gapcontinue"]
         else:
@@ -354,7 +355,7 @@ class Pywiki:
         if gar_continue != "":
             data["garcontinue"] = gar_continue
         response = self.request(data)
-        
+
         if "continue" in response:
             gar_continue = response["continue"]["garcontinue"]
         else:
@@ -395,7 +396,7 @@ class Pywiki:
             "format":"json"
         }
         if self.assertion == "bot":
-            prepare["bot"] = 1
+            data["bot"] = 1
         if nocreate:
             data["nocreate"] = ""
         elif createonly:
@@ -496,7 +497,7 @@ class Pywiki:
             "prop":"info",
             "assert":self.assertion,
         })
-    
+
         response = json.loads(r.text)
         page_list = response["query"]["pages"]
         result = []
@@ -515,7 +516,7 @@ class Pywiki:
     def delete(self, titles, reason):
         if isinstance(titles, basestring):
             titles = [titles]
-    
+
         data = {
             "action":"delete",
             "format":"json",
@@ -537,7 +538,7 @@ class Pywiki:
             old_titles = [old_titles]
         if isinstance(new_titles, basestring):
             new_titles = [new_titles]
-    
+
         data = {
             "action":"move",
             "format":"json",
@@ -586,7 +587,7 @@ class Pywiki:
             for id in response:
                 result += [[response[id]["title"], response[id]["revisions"][0]["*"]]]
             titles = titles[self.limit:]
-            
+
         return result
 
     def upload(self, filename, path, text, summary=""):
@@ -604,7 +605,7 @@ class Pywiki:
 
     """
     def chuncked_upload(self, ):
-        
+
     def url_upload(self, ):
     {
     "action": "upload",
@@ -616,4 +617,4 @@ class Pywiki:
     "token": "14c0e81166da6b3d6f805c113ab4f04658a846cd+\\"
     }
     """
-    
+

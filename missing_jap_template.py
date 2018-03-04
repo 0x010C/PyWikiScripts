@@ -11,7 +11,7 @@ import re
 #Paramètres
 searched_cat = "Catégorie:Portail:Japon/Articles liés"
 regex = re.compile(ur"\{\{([Jj]aponais|[Nn]ihongo)")
-page = u"User:NeoBOT/Modèle japonais manquant"
+page = u"User:NeoBot/Modèle japonais manquant"
 
 
 # Main
