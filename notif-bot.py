@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 #Autor: Antoine "0x010C" Lamielle
 #Creation date: 28 October 2015
@@ -13,7 +13,6 @@ import pywiki
 #Paramètres
 version = "2.0"
 reply = {
-        "title":              "User talk:WikiMOOC",
         "section_title":      "Bonjour $1 !",
         "content":            "J'ai bien reçu votre notification, je vous notifie en retour : {{Notif|$1}} {{clin}} ~~~~",
         "summary":            "Notification",
@@ -58,15 +57,17 @@ def main():
 	reload(sys)
 	sys.setdefaultencoding('utf8')
 
-	pw = pywiki.Pywiki("frwiki-NeoBOT")
+	pw = pywiki.Pywiki("frwiki-NotifBot")
 	pw.login()
-	(IDs, names) = pw.get_notifications_list()
-	print names
-	for name in names:
-		title = "\n== " + name.join(reply["section_title"].split("$1")) + " ==\n"
-		text = name.join(reply["content"].split("$1"))
-		summary = name.join(reply["summary"].split("$1"))
-		pw.append(reply["title"], title + text, summary, nocreate=True)
-	pw.clean_notifications(IDs)
+	while True:
+		(IDs, names) = pw.get_notifications_list()
+		for name in names:
+			print name
+			title = "\n== " + name.join(reply["section_title"].split("$1")) + " ==\n"
+			text = name.join(reply["content"].split("$1"))
+			summary = name.join(reply["summary"].split("$1"))
+			pw.append('User_talk:' + pw.basic_user_name, title + text, summary, nocreate=True)
+		pw.clean_notifications(IDs)
+		time.sleep(180)
 
 main()

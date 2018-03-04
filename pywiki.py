@@ -59,6 +59,7 @@ class Pywiki:
         config = __import__(config_name, globals(), locals(), [], -1)
 
         self.user = config.user
+	self.basic_user_name = self.user.split("@")[0]
         self.password = config.password
         self.api_endpoint = config.api_endpoint
         self.assertion = config.assertion
@@ -426,7 +427,7 @@ class Pywiki:
             "format":"json"
         }
         if self.assertion == "bot":
-            prepare["bot"] = 1
+            data["bot"] = 1
         if nocreate:
             data["nocreate"] = ""
         elif createonly:
